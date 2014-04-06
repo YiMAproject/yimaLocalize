@@ -1,0 +1,43 @@
+{
+    "name": "rayamedia/yima-localize",
+    "type": "yima-core-module",
+    "description": "Localization features for multilingual DB`s(translatable fields), CLDR data for full system localization of data, and many predefined useful locale helpers.",
+    "keywords": [
+        "localization",
+        "multi lingual",
+        "locale",
+        "languages",
+        "zf2 module",
+        "zf2",
+        "yima",
+        "raya media"
+    ],
+    "authors": [
+        {
+            "name": "Payam Naderi",
+            "email": "naderi.payam@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.3",
+        "rayamedia/yima-plugin-installer": "dev-master"
+    },
+    "extra": {
+        "yima-plugin-name": "yimaLocalize"
+    },
+    "autoload" : {
+        "psr-0" : {
+            "yimaLocalize\\" : "src/"
+        },
+        "classmap" : [
+            "./Module.php"
+        ]
+    },
+    "minimum-stability": "dev",
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "http://packages.raya-media.com/"
+        }
+    ]
+}
