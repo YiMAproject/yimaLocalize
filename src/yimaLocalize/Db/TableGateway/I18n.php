@@ -1,7 +1,7 @@
 <?php
 namespace yimaLocalize\Db\TableGateway;
 
-use YimaBase\Db\TableGateway\AbstractTableGateway;
+use yimaBase\Db\TableGateway\AbstractTableGateway;
 
 /**
  * Translation tables must instace of \Zend\Db\Adapter\AdapterAwareInterface

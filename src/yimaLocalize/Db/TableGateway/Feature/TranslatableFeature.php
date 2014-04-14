@@ -32,7 +32,7 @@ use Zend\Stdlib\ArrayUtils;
 use Zend\Db\Metadata\Metadata;
 use Zend\Db\Sql\Expression;
 
-use YimaBase\Db\TableGateway\Provider\PrimaryKeyProviderInterface;
+use yimaBase\Db\TableGateway\Provider\PrimaryKeyProviderInterface;
 
 /**
  * Class TranslatableFeature

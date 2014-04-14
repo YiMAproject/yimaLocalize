@@ -3,11 +3,26 @@ namespace yimaLocalize;
 
 use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
 use Zend\ModuleManager\Feature\ConfigProviderInterface;
+use Zend\ModuleManager\Feature\ServiceProviderInterface;
 
 class Module implements
+    ServiceProviderInterface,
     ConfigProviderInterface,
     AutoloaderProviderInterface
 {
+    /**
+     * @inheritdoc
+     *
+     */
+    public function getServiceConfig()
+    {
+        return array(
+            'invokables' => array (
+                'yimaLocalize.Model.TableGateway.Sample' => 'yimaLocalize\Model\TableGateway\Sample',
+            ),
+        );
+    }
+
     /**
      * Returns configuration to merge with application configuration
      *
