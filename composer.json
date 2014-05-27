@@ -20,6 +20,8 @@
     ],
     "require": {
         "php": ">=5.3.3",
+        "poirot/cldr": "dev-master",
+        "poirot/datetime": "dev-master",
         "rayamedia/yima-plugin-installer": "dev-master"
     },
     "extra": {

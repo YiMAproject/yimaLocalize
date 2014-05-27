@@ -1,5 +1,11 @@
 <?php
 return array (
+    'yima_locali_plugins' => array(
+        'factories'  => array(
+            'dateTime' => '\yimaLocalize\LocaliPlugins\DateTimeFactory',
+        ),
+    ),
+
     // Translator settings
     'translator' => array(
         'translation_file_patterns' => array(
