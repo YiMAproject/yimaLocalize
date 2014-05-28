@@ -3,16 +3,33 @@ namespace yimaLocalize;
 
 use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
 use Zend\ModuleManager\Feature\ConfigProviderInterface;
+use Zend\ModuleManager\Feature\InitProviderInterface;
 use Zend\ModuleManager\Feature\ServiceProviderInterface;
+use Zend\ModuleManager\ModuleManagerInterface;
 
 class Module implements
+    InitProviderInterface,
     ServiceProviderInterface,
     ConfigProviderInterface,
     AutoloaderProviderInterface
 {
     /**
-     * @inheritdoc
+     * Initialize workflow
      *
+     * @param  ModuleManagerInterface $manager
+     *
+     * @return void
+     */
+    public function init(ModuleManagerInterface $moduleManager)
+    {
+        /** @var $moduleManager \Zend\ModuleManager\ModuleManager */
+
+        // Localization module work beside of yimaLocali module
+        $moduleManager->loadModule('yimaLocali');
+    }
+
+    /**
+     * @inheritdoc
      */
     public function getServiceConfig()
     {
