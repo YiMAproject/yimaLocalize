@@ -136,3 +136,24 @@ $projectTable->delete(
     array('sampletable_id'=>1 )
 );
 ```
+Using Localized Calendar
+-----------
+this is one of locale() helper plugins that convert dates to localized result.
+lets see some examples.
+
+```php
+# in view or controllers as helper
+
+# Determine the detected locale is fa_IR
+
+echo $this->locale(); // fa_IR
+// this will print out date in persian calendar
+echo $this->locale()->datetime()->format('Y-m-d H:i:s'); // 1393-03-07 21:53:30
+
+# Determine the detected locale is nl_BE
+
+echo $this->locale(); // nl_BE
+// this will print out date in persian calendar
+echo $this->locale()->datetime()->format('Y-M-d l'); // 2014-mei-28 woensdag
+```
+
