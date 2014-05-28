@@ -40,7 +40,8 @@ class DatetimeFactory implements ServiceManager\FactoryInterface
             $class = $this->getCalendarClass($calendar);
         }
 
-        $calendar = new $class($locale);
+        // Instancing Calendar with current detected Locale
+        $calendar = new $class($locale); // Detected Locale
         if (!$calendar instanceof LocalizedAbstract) {
             throw new \Exception('Calendar must instanceof "LocalizedAbstract" but "'.get_class($calendar).'" given.');
         }
