@@ -3,6 +3,7 @@ namespace yimaLocalize\LocaliPlugins;
 
 use Poirot\DateTime;
 use yimaLocali\Service\LocaleSupport;
+use yimaLocalize\LocaliPlugins\DateTime\Calendar\LocalizedAbstract;
 use Zend\ServiceManager;
 
 /**
@@ -40,6 +41,10 @@ class DatetimeFactory implements ServiceManager\FactoryInterface
         }
 
         $calendar = new $class($locale);
+        if (!$calendar instanceof LocalizedAbstract) {
+            throw new \Exception('Calendar must instanceof "LocalizedAbstract" but "'.get_class($calendar).'" given.');
+        }
+
         $poirotDatetime->setCalendar($calendar);
         // -----------------------------------------------------------------------------------
 

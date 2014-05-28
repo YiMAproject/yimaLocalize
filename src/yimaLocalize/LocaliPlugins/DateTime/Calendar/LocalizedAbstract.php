@@ -5,7 +5,7 @@ use Poirot\Cldr\DataProvider\ProviderAbstract;
 use Poirot\DateTime\Calendar\CalendarInterface;
 use Poirot\DateTime\CalendarInterval;
 
-class LocalizedAbstract extends ProviderAbstract
+abstract class LocalizedAbstract extends ProviderAbstract
     implements CalendarInterface
 {
     /**
@@ -32,6 +32,35 @@ class LocalizedAbstract extends ProviderAbstract
     {
         return $this->calName;
     }
+
+    /**
+     * English ordinal suffix for the day of the month, 2 characters
+     * exp. st, nd, rd or th. Works well with j char format
+     * @note return null if there is no specific suffix
+     *
+     * @return string|null
+     */
+    abstract public function getMonthSuffix();
+
+    /**
+     * Calculate date to calendar system
+     *
+     * @param int $gYear Year in gregorian system
+     * @param int $gMonth Month in gregorian system
+     * @param int $gDay Day in gregorian system
+     *
+     * @return CalendarInterval|false
+     */
+    abstract public function calculateDate($gYear, $gMonth, $gDay);
+
+    /**
+     * Which The day of the year (starting from 0)
+     * exp. 0 through 365
+     * @note return null mean datetime must use default value
+     *
+     * @return int|null
+     */
+    abstract public function calculateDayOfYear($month, $day);
 
     /**
      * Get array of narrow textual representation of a day
@@ -257,19 +286,5 @@ class LocalizedAbstract extends ProviderAbstract
         $val = strtolower($val);
 
         return (isset($dayperiods[$val])) ? $dayperiods[$val] : $this->getDayPeriods($val);
-    }
-
-    /**
-     * Calculate date to calendar system
-     *
-     * @param int $gYear Year in gregorian system
-     * @param int $gMonth Month in gregorian system
-     * @param int $gDay Day in gregorian system
-     *
-     * @return CalendarInterval|false
-     */
-    public function calculateDate($gYear, $gMonth, $gDay)
-    {
-        return false;
     }
 }
