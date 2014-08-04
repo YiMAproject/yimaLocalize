@@ -277,23 +277,25 @@ class TranslatableFeature extends AbstractFeature
 	{
 		$tableName = $this->tableGateway->getTable();
 
-        $return = null; $i = 0;
+        $i = 0; $return = array();
 		foreach ($resultSet as $row) {
+            $originalColumns = array();
+            $translatedColumns = array();
 			foreach ($row as $field => $val) {
 				$name = $tableName.'I18n__';
 				if (strstr($field, $name) === $field) {
 				    // this is translation columns field
 					$originField = substr($field, strlen($name), (strlen($field)-strlen($name)));
-					$return[$i][$originField] = ($val) ? $val : $row[$originField]; // use default content if no translation available
-					unset($return[$i][$field]);
+					$translatedColumns[$originField] = ($val) ? $val : $row[$originField]; // use default content if no translation available
+					unset($translatedColumns[$field]);
 
                     continue;
 				}
 
-                $return[$i][$field] = $val;
+                $originalColumns[$field] = $val;
 			}
 
-            $i++;
+            $return[$i++] = array_merge($originalColumns, $translatedColumns);
 		}
 
         if ($return) {
