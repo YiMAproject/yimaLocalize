@@ -12,6 +12,6 @@ use yimaBase\Db\TableGateway\AbstractTableGateway;
 class I18n extends AbstractTableGateway
 {
 	# db table name
-    protected $table = 'yimaLocalize_i18n';
+    protected $table = 'yimalocalize_i18n';
 
 }
