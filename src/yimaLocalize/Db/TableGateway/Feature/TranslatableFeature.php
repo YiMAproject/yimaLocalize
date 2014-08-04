@@ -19,12 +19,11 @@
 namespace yimaLocalize\Db\TableGateway\Feature;
 
 use Locale as StdLocale;
-use ArrayAccess;
 use Traversable;
 
+use yimaBase\Db\TableGateway\AbstractTableGateway;
 use Zend\Db\TableGateway\Feature\AbstractFeature;
 use Zend\Db\TableGateway\Exception;
-use Zend\Db\TableGateway\AbstractTableGateway;
 
 use yimaLocalize\Db\TableGateway\I18n;
 use Zend\Stdlib\ArrayUtils;
@@ -49,25 +48,24 @@ class TranslatableFeature extends AbstractFeature
 	protected $locale;
 	
 	/**
-	 * Static Locale
+	 * Static Default Locale
 	 * 
-	 * to avoid tableGateway implement ServiceLocatorAware 
-	 *
-	 * @var string | cLocali\Locale
+	 * @var string
 	 */
 	protected static $staticLocale;
 	
 	/**
-	 * Field haai az in table ke baayad localize shavand
+	 * Columns of table to be localized
 	 *
-	 * @var array | string
+	 * @var array
 	 */
-	protected $translatableFields;
+	protected $translatableFields = array();
 	
 	/**
-	 * Service e table-i- ke translation e field haa ro negah midaarad
+	 * Translation TableGateway Instance
+     * : this table store translation rows
 	 *
-	 * @var Application\Db\TableGateway\AbstractTableGateway
+	 * @var AbstractTableGateway
 	 */
 	protected $i18nTable;
 	
@@ -77,174 +75,133 @@ class TranslatableFeature extends AbstractFeature
 	 * @var array
 	 */
 	protected $storedValues;
-	
-	public function __construct($translatableFields = array() , $i18nTable = null, $locale = null)
+
+    /**
+     * Construct
+     *
+     * @param array                     $translatableFields Translatable Fields
+     * @param null|AbstractTableGateway $i18nTable          Table for Translation Rows
+     * @param null|string               $locale             Locale
+     */
+    public function __construct($translatableFields = array() , $i18nTable = null, $locale = null)
 	{
 		if (! empty($translatableFields) ) {
 			$this->setTranslatableFields($translatableFields);
 		}
 		
-		if ($i18nTable == null) {
-			$i18nTable = new I18n;
+		if ($i18nTable !== null) {
+            $this->setTranslationTable($i18nTable);
 		}
 		
 		if ($locale !== null) {
 			$this->setLocale($locale);
 		}
-		
-		$this->setTranslationTable($i18nTable);
 	}
-	
-	public function setLocale($locale)
+
+    /**
+     * Set Locale
+     *
+     * @param string $locale Locale
+     *
+     * @return $this
+     */
+    public function setLocale($locale)
 	{
-		$locale = (string) $locale;
-	
-		$this->locale = $locale;
+		$this->locale = (string) $locale;
+
 		return $this;
 	}
 	
 	/**
 	 * Get Current locale
 	 *
-	 * if not set try to get from locale resource object
-	 *
 	 * @return string
 	 */
 	public function getLocale()
 	{
-		if ($this->locale) {
-			return $this->locale;
+		if (!$this->locale) {
+            $locale = self::getStaticLocale();
+            if (!$locale) {
+                $locale = StdLocale::getDefault();
+            }
+
+            $this->setLocale($locale);
 		}
-		
-		if ($locale = self::getStaticLocale()) {
-			$this->setLocale($locale);
-		}
-		
-		$this->setLocale(StdLocale::getDefault());
-		
-		// @todo seems not neccessery at all, use static setter approach ...........................................
-		
-		// get locale from serviceLocator
-		/* $tableGateway = $this->tableGateway;
-		if (! $tableGateway instanceof ServiceLocatorAwareInterface) {
-			throw new Exception\RuntimeException(sprintf(
-				'Default Locale is empty, Table "%s" must instanceof ServiceLocatorAwareInterface to detect locale.'
-			));
-		}
-		$sl = $tableGateway->getServiceLocator();
-		if (! $sl->has('locale') ) {
-			throw new Exception\RuntimeException(sprintf(
-				'Default Locale is empty, Locale Service not found in serviceLocator.'
-			));
-		}
-		
-		$this->locale = (string) $sl->get('locale');  */
 		
 		return $this->locale;
 	}
 	
 	/**
-	 * Table-i- ke translation haaa raa negah midaarad
+	 * Set Translation TableGateway
 	 *
-	 * @param string | AbstractTableGateway $tableGateway
+	 * @param AbstractTableGateway $tableGateway TableGateway Instance
+     *
+     * @return $this
 	 */
-	public function setTranslationTable($tableGateway)
+	public function setTranslationTable(AbstractTableGateway $tableGateway)
 	{
-		if (is_string($tableGateway) && class_exists($tableGateway)) {
-			$tableGateway = new $tableGateway();  
-		}
-		
-		/**
-		 * TODO: throw exception shabih be DmsFeature setDmsTable Shavad
-		 */
-		if (is_object($tableGateway)) {
-			if (!$tableGateway instanceof AbstractTableGateway) {
-				throw new Exception\RuntimeException(sprintf(
-					'Translation Table must instance of "AbstractTableGateway" but "%s" given.'
-				),get_class($tableGateway));
-			}
-		} else {
-			throw new Exception\RuntimeException(sprintf(
-				'Translation Table must instance of "AbstractTableGateway" but "%s" given.'
-			),gettype($tableGateway));
-		}
-		
-		/*
-		 * If Translation table dont have adapter yet
-		 */
-		if (! $tableGateway->getAdapter() && $tableGateway instanceof \Zend\Db\Adapter\AdapterAwareInterface) {
+		// If Translation table dont have adapter yet
+		if (! $tableGateway->getAdapter()
+            && $tableGateway instanceof \Zend\Db\Adapter\AdapterAwareInterface
+        ) {
 			$tableGateway->setAdapter($this->tableGateway->adapter); 
 		}
 		
 		$this->i18nTable = $tableGateway;
+
 		return $this;
 	}
-	
-	public function getTranslationTable()
+
+    /**
+     * Get Translation TableGateway Instance
+     *
+     * @return AbstractTableGateway
+     */
+    public function getTranslationTable()
 	{
+        if (!$this->i18nTable) {
+            $this->setTranslationTable(new I18n());
+        }
+
 		return $this->i18nTable;
 	}
-	
-	
+
 	/**
-	 * Field haaee az in table ke baayad translate shavand
-	 * raa dar ghaalebe array bar migardaanad
+	 * Set Translatable Columns
 	 *
-	 * @return array
+	 * @param array $fields Translatable Columns
+     *
+     * @return $this
 	 */
-	public function getTranslatableFields()
+	public function setTranslatableFields(array $fields)
 	{
-		$fields = $this->translatableFields;
-	
-		if (is_string($fields)) {
-			$fields = (array) $fields;
-		} elseif ($fields == null) {
-			$fields = array();
-		}
-	
-		return $fields;
-	}
-	
-	/**
-	 * Field haaee ro ke baayad translate shavand be class moa`refi mikonad
-	 *
-	 * @param string | array $fields
-	 */
-	public function setTranslatableFields($fields)
-	{
-		if (is_string($fields)) {
-			$fields = (array) $fields;  
-		}
-		
-		if ($fields instanceof Traversable) {
-			$fields = ArrayUtils::iteratorToArray($fields);
-		}
-		
-		if (! is_array($fields) ) {
-			throw new Exception\InvalidArgumentException(sprintf(
-				'%s expects an array, or object implementing Traversable or Array; received "%s"',
-				$method,
-				(is_object($fields) ? get_class($fields) : gettype($fields))
-			));
-		}
-		
 		$this->translatableFields = $fields;
+
 		return $this;
 	}
+
+    /**
+     * Get Translatable Columns
+     *
+     * @return array
+     */
+    public function getTranslatableFields()
+    {
+        return $this->translatableFields;
+    }
 	
 	/**
 	 * Add Translation Field(s) to current field(s)
 	 *
-	 * @param string | array $field
+	 * @param array $field Translatable Column(s)
+     *
+     * @return $this
 	 */
-	public function addTranslatableField($field)
+	public function addTranslatableField(array $field)
 	{
-		$currFields = $this->getTranslationFields();
-	
-		$this->setTranslationFields($field);
-		$extraField = $this->getTranslationFields();
-	
-		$this->setTranslationFields(array_merge($extraField,$currFields));
+		$currFields = $this->getTranslatableFields();
+
+		$this->setTranslatableFields(array_merge($currFields, $field));
 	
 		return $this;
 	}
@@ -276,7 +233,7 @@ class TranslatableFeature extends AbstractFeature
 		$tableGateway = $this->tableGateway;
 		$tableName    = $tableGateway->getTable();
 		$tableClass   = get_class($tableGateway);
-		
+
 		$tablePrimKey = $this->getPrimaryKey($tableGateway);    
 		
 		$locale       = $this->getLocale();
