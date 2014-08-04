@@ -19,18 +19,16 @@
 namespace yimaLocalize\Db\TableGateway\Feature;
 
 use Locale as StdLocale;
-use Traversable;
-
 use yimaBase\Db\TableGateway\AbstractTableGateway;
+use Zend\Db\Adapter\Driver\Pdo\Result;
+use Zend\Db\Adapter\Driver\Pdo\Statement;
+use Zend\Db\ResultSet\ResultSet;
+use Zend\Db\Sql\Select;
 use Zend\Db\TableGateway\Feature\AbstractFeature;
 use Zend\Db\TableGateway\Exception;
-
 use yimaLocalize\Db\TableGateway\I18n;
-use Zend\Stdlib\ArrayUtils;
-
 use Zend\Db\Metadata\Metadata;
 use Zend\Db\Sql\Expression;
-
 use yimaBase\Db\TableGateway\Provider\PrimaryKeyProviderInterface;
 
 /**
@@ -228,7 +226,7 @@ class TranslatableFeature extends AbstractFeature
 	
 	// ............................................................................................................
 	
-	public function preSelect($select)
+	public function preSelect(Select $select)
 	{
 		$tableGateway = $this->tableGateway;
 		$tableName    = $tableGateway->getTable();
@@ -237,7 +235,7 @@ class TranslatableFeature extends AbstractFeature
 		$tablePrimKey = $this->getPrimaryKey($tableGateway);    
 		
 		$locale       = $this->getLocale();
-		
+
 		foreach ($this->getTranslatableFields() as $tf) {
 			$name = 'I18n__'.$tf;
 			// get name of translation table
@@ -270,28 +268,37 @@ class TranslatableFeature extends AbstractFeature
 				// `I18n__description`.`content` AS `sampletableI18n__description`
 				,array($tableName.$name => 'content') 
 					// toSolve: dar taghaabol baa exp. DMS gharaar migirad va field e tarjome shode tarjome nemishavad
+                ,Select::JOIN_LEFT
 			);
 		}
 	}
 	
-	public function postSelect($statement, $result, $resultSet)
+	public function postSelect(Statement $statement, Result $result, ResultSet $resultSet)
 	{
-		$return = $resultSet->toArray();
-		
 		$tableName = $this->tableGateway->getTable();
-		foreach ($return as $i => $row) {
+
+        $return = null; $i = 0;
+		foreach ($resultSet as $row) {
 			foreach ($row as $field => $val) {
 				$name = $tableName.'I18n__';
-				// agar field e translate bood baa meghdaar e field e asli jaaigozin mishavad
-				if (strpos($field, $name) !== false) {
+				if (strstr($field, $name) === $field) {
+				    // this is translation columns field
 					$originField = substr($field, strlen($name), (strlen($field)-strlen($name)));
-					$return[$i][$originField] = $val;
+					$return[$i][$originField] = ($val) ? $val : $row[$originField]; // use default content if no translation available
 					unset($return[$i][$field]);
+
+                    continue;
 				}
+
+                $return[$i][$field] = $val;
 			}
+
+            $i++;
 		}
-		
-		$resultSet->initialize($return);
+
+        if ($return) {
+            $resultSet->initialize($return);
+        }
 	}
 	
 	public function preInsert($insert)
