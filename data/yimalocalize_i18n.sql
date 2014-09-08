@@ -17,17 +17,11 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8 */;
 
 --
--- Database: `orfe`
+-- Table structure for table `yimalocalize_i18n`
 --
 
--- --------------------------------------------------------
-
---
--- Table structure for table `yimaLocalize_i18n`
---
-
-DROP TABLE IF EXISTS `yimaLocalize_i18n`;
-CREATE TABLE IF NOT EXISTS `yimaLocalize_i18n` (
+DROP TABLE IF EXISTS `yimalocalize_i18n`;
+CREATE TABLE IF NOT EXISTS `yimalocalize_i18n` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
   `locale` varchar(6) NOT NULL,
   `model` varchar(255) NOT NULL,
