@@ -20,12 +20,12 @@ class Module implements
      *
      * @return void
      */
-    public function init(ModuleManagerInterface $moduleManager)
+    public function init(ModuleManagerInterface $moduleModuleManager)
     {
-        /** @var $moduleManager \Zend\ModuleManager\ModuleManager */
+        /** @var $moduleModuleManager \Zend\ModuleManager\ModuleManager */
 
         // Localization module work beside of yimaLocali module
-        $moduleManager->loadModule('yimaLocali');
+        $moduleModuleManager->loadModule('yimaLocali');
     }
 
     /**
